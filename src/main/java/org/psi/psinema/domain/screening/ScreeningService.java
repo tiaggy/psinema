@@ -84,6 +84,7 @@ public class ScreeningService {
                 .startTime(request.getStartTime())
                 .endTime(endTime)
                 .basePrice(request.getBasePrice())
+                .status(ScreeningStatus.SCHEDULED)
                 .build();
         return screeningRepository.save(screening);
     }
@@ -112,6 +113,7 @@ public class ScreeningService {
     public void cancel(Long id) {
         Screening screening = findById(id);
         screening.setCancelled(true);
+        screening.setStatus(ScreeningStatus.CANCELED);
         screeningRepository.save(screening);
         // cascade ticket cancellation + refunds handled by OrderService
     }

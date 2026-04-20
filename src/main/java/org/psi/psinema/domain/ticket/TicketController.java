@@ -2,6 +2,7 @@ package org.psi.psinema.domain.ticket;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.psi.psinema.domain.ticket.dto.ManualCheckRequest;
 import org.psi.psinema.domain.ticket.dto.ValidateRequest;
 import org.psi.psinema.domain.user.UserRepository;
 import org.springframework.http.MediaType;
@@ -41,8 +42,14 @@ public class TicketController {
     }
 
     @PostMapping("/validate")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('ENTRY_CONTROLLER') or hasRole('EMPLOYEE')")
     public ResponseEntity<Ticket> validate(@Valid @RequestBody ValidateRequest request) {
         return ResponseEntity.ok(ticketService.validateQr(request.getQrCodeData()));
+    }
+
+    @PostMapping("/manual-check")
+    @PreAuthorize("hasRole('ENTRY_CONTROLLER') or hasRole('EMPLOYEE')")
+    public ResponseEntity<Ticket> manualCheck(@Valid @RequestBody ManualCheckRequest request) {
+        return ResponseEntity.ok(ticketService.manualCheck(request.getTicketId()));
     }
 }

@@ -1,20 +1,4 @@
--- init.sql  -  seed PSInema catalog data (halls, seats, movies, screenings, snacks).
--- Admin/employee users are seeded by DataInitializer at app boot.
--- Re-runnable: wipes catalog tables first.
-
-BEGIN TRANSACTION;
-
-DELETE FROM ticket;
-DELETE FROM payment;
-DELETE FROM snack_order_item;
-DELETE FROM snack_order;
-DELETE FROM orders;
-DELETE FROM seat_reservation;
-DELETE FROM screening;
-DELETE FROM seat;
-DELETE FROM hall;
-DELETE FROM movie;
-DELETE FROM snack_item;
+-- Seed PSInema catalog data (halls, seats, movies, screenings, snacks).
 
 -- Halls
 INSERT INTO hall (id, name, total_rows, seats_per_row) VALUES
@@ -125,5 +109,3 @@ INSERT INTO snack_item (id, name, description, price, stock_quantity, image_url,
   (7, 'Hot Dog', 'Classic hot dog with mustard and ketchup', 4.9, 80, NULL, 1),
   (8, 'Mineral Water 0.5L', 'Still mineral water', 2.0, 300, NULL, 1),
   (9, 'Ice Cream Vanilla', 'Single scoop vanilla ice cream', 3.0, 120, NULL, 1);
-
-COMMIT;

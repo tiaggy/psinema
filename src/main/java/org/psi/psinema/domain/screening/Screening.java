@@ -38,4 +38,8 @@ public class Screening {
 
     @Builder.Default
     private boolean cancelled = false;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ScreeningStatus status = ScreeningStatus.SCHEDULED;
 }

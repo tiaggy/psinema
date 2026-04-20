@@ -12,6 +12,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("SELECT m FROM Movie m WHERE m.active = true " +
            "AND (:genre IS NULL OR m.genre = :genre) " +
-           "AND (:title IS NULL OR LOWER(m.title) LIKE LOWER(CONCAT('%', CAST(:title AS string), '%')))")
+           "AND (:title IS NULL OR LOWER(m.title) LIKE LOWER(CONCAT('%', :title, '%')))")
     List<Movie> findActiveFiltered(@Param("genre") Genre genre, @Param("title") String title);
 }

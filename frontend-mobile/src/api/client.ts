@@ -1,14 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 
-function resolveBaseUrl(): string {
-  const hostUri = Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.debuggerHost;
-  const host = hostUri ? hostUri.split(':')[0] : 'localhost';
-  return `http://${host}:8080/api`;
-}
-
-const BASE_URL = resolveBaseUrl();
+const BASE_URL = 'http://10.0.2.2:8080/api'; // Android emulator → localhost; change to your IP for physical device
 
 const client = axios.create({ baseURL: BASE_URL });
 

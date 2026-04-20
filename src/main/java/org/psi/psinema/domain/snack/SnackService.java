@@ -7,6 +7,7 @@ import org.psi.psinema.domain.snack.dto.SnackItemRequest;
 import org.psi.psinema.domain.snack.dto.SnackOrderRequest;
 import org.psi.psinema.exception.ConflictException;
 import org.psi.psinema.exception.ResourceNotFoundException;
+import org.psi.psinema.notification.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class SnackService {
     private final SnackItemRepository snackItemRepository;
     private final SnackOrderRepository snackOrderRepository;
     private final OrderRepository orderRepository;
+    private final NotificationService notificationService;
 
     public List<SnackItem> findAvailableItems() {
         return snackItemRepository.findByAvailableTrue();
@@ -95,7 +97,9 @@ public class SnackService {
 
         snackOrder.setTotalAmount(total);
         snackOrder.setItems(items);
-        return snackOrderRepository.save(snackOrder);
+        SnackOrder saved = snackOrderRepository.save(snackOrder);
+        notificationService.notifyBuffetStaff(saved.getId());
+        return saved;
     }
 
     public SnackOrder findById(Long id) {

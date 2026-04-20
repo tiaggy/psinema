@@ -20,6 +20,7 @@ import org.psi.psinema.domain.user.UserRepository;
 import org.psi.psinema.exception.CancellationNotAllowedException;
 import org.psi.psinema.exception.ConflictException;
 import org.psi.psinema.exception.ResourceNotFoundException;
+import org.psi.psinema.notification.NotificationService;
 import org.psi.psinema.util.QrCodeGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final PaymentGateway paymentGateway;
     private final PaymentRepository paymentRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Order confirmOrder(OrderRequest request, String userEmail) {
@@ -195,6 +197,7 @@ public class OrderService {
             order.setStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
             processRefund(order, tickets);
+            notificationService.notifyScreeningCancelled(order.getUser(), screening);
         }
     }
 
@@ -207,6 +210,12 @@ public class OrderService {
                     payment.getExternalTransactionId(), refundAmount);
             payment.setStatus(result.success() ? PaymentStatus.REFUNDED : PaymentStatus.MANUAL_REFUND);
             paymentRepository.save(payment);
+            if (result.success()) {
+                order.setStatus(OrderStatus.REFUNDED);
+                orderRepository.save(order);
+                notificationService.notifyRefundProcessed(
+                        order.getUser(), payment.getExternalTransactionId(), refundAmount.toPlainString());
+            }
         });
     }
 }

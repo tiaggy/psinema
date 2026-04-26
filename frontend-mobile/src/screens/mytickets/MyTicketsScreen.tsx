@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { getMyTickets } from '../../api/orders';
 import { useAuthStore } from '../../store/authStore';
@@ -25,7 +25,7 @@ export default function MyTicketsScreen({ navigation }: any) {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>My Tickets</Text>
       {isLoading ? <ActivityIndicator color="#e94560" style={{ marginTop: 40 }} /> : (
         <FlatList
@@ -50,7 +50,7 @@ export default function MyTicketsScreen({ navigation }: any) {
           ListEmptyComponent={<Text style={styles.empty}>No tickets found.</Text>}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

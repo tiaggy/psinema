@@ -22,6 +22,7 @@ import org.psi.psinema.exception.ConflictException;
 import org.psi.psinema.exception.ResourceNotFoundException;
 import org.psi.psinema.notification.NotificationService;
 import org.psi.psinema.util.QrCodeGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +45,9 @@ public class OrderService {
     private final PaymentGateway paymentGateway;
     private final PaymentRepository paymentRepository;
     private final NotificationService notificationService;
+
+    @Value("${app.dont-pay:false}")
+    private boolean dontPay;
 
     @Transactional
     public Order confirmOrder(OrderRequest request, String userEmail) {
@@ -72,12 +76,6 @@ public class OrderService {
         BigDecimal basePrice = screening.getBasePrice() != null ? screening.getBasePrice() : BigDecimal.ZERO;
         BigDecimal total = basePrice.multiply(BigDecimal.valueOf(reservations.size()));
 
-        // Process payment
-        PaymentGateway.PaymentResult result = paymentGateway.charge(total, request.getPaymentToken());
-        if (!result.success()) {
-            throw new ConflictException("Payment failed: " + result.message());
-        }
-
         // Create order
         Order order = Order.builder()
                 .user(user)
@@ -87,15 +85,21 @@ public class OrderService {
                 .build();
         order = orderRepository.save(order);
 
-        // Record payment
-        Payment payment = Payment.builder()
-                .order(order)
-                .status(PaymentStatus.COMPLETED)
-                .externalTransactionId(result.transactionId())
-                .amount(total)
-                .processedAt(LocalDateTime.now())
-                .build();
-        paymentRepository.save(payment);
+        // Process payment (skipped when app.dont-pay=true)
+        if (!dontPay) {
+            PaymentGateway.PaymentResult result = paymentGateway.charge(total, request.getPaymentToken());
+            if (!result.success()) {
+                throw new ConflictException("Payment failed: " + result.message());
+            }
+            Payment payment = Payment.builder()
+                    .order(order)
+                    .status(PaymentStatus.COMPLETED)
+                    .externalTransactionId(result.transactionId())
+                    .amount(total)
+                    .processedAt(LocalDateTime.now())
+                    .build();
+            paymentRepository.save(payment);
+        }
 
         // Create tickets + release reservations
         List<Ticket> tickets = new ArrayList<>();

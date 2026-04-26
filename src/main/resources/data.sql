@@ -74,12 +74,12 @@ INSERT INTO seat (id, row_number, seat_number, type, hall_id) VALUES
 
 -- Movies
 INSERT INTO movie (id, title, description, genre, duration_minutes, director, release_date, poster_url, active) VALUES
-  (1, 'Dune: Part Two', 'Paul Atreides unites with Chani and the Fremen to take revenge against those who destroyed his family.', 'SCI_FI', 166, 'Denis Villeneuve', '2024-03-01 00:00:00.000', NULL, 1),
-  (2, 'Oppenheimer', 'The story of J. Robert Oppenheimer and his role in the development of the atomic bomb.', 'DRAMA', 180, 'Christopher Nolan', '2023-07-21 00:00:00.000', NULL, 1),
-  (3, 'Barbie', 'Barbie and Ken leave the perfect world of Barbieland for the real world.', 'COMEDY', 114, 'Greta Gerwig', '2023-07-21 00:00:00.000', NULL, 1),
-  (4, 'Inside Out 2', 'Riley enters puberty and new emotions arrive at Headquarters.', 'ANIMATION', 96, 'Kelsey Mann', '2024-06-14 00:00:00.000', NULL, 1),
-  (5, 'The Batman', 'Vigilante Batman investigates corruption in Gotham City.', 'ACTION', 176, 'Matt Reeves', '2022-03-04 00:00:00.000', NULL, 1),
-  (6, 'The Holdovers', 'A curmudgeonly teacher is forced to remain on campus over the holidays.', 'DRAMA', 133, 'Alexander Payne', '2023-10-27 00:00:00.000', NULL, 1);
+  (1, 'Dune: Part Two', 'Paul Atreides unites with Chani and the Fremen to take revenge against those who destroyed his family.', 'SCI_FI', 166, 'Denis Villeneuve', '2024-03-01 00:00:00.000', 'https://media.themoviedb.org/t/p/w300_and_h450_face/kL45IvaxU3v0Lb7TjxVHbAkDCYU.jpg', 1),
+  (2, 'Oppenheimer', 'The story of J. Robert Oppenheimer and his role in the development of the atomic bomb.', 'DRAMA', 180, 'Christopher Nolan', '2023-07-21 00:00:00.000', 'https://media.themoviedb.org/t/p/w300_and_h450_face/gz0LUZClgzS6hCzurFk89e5G5d1.jpg', 1),
+  (3, 'Barbie', 'Barbie and Ken leave the perfect world of Barbieland for the real world.', 'COMEDY', 114, 'Greta Gerwig', '2023-07-21 00:00:00.000', 'https://media.themoviedb.org/t/p/w300_and_h450_face/eQjbB8p6BorINovLUk6flHhdGsZ.jpg', 1),
+  (4, 'Inside Out 2', 'Riley enters puberty and new emotions arrive at Headquarters.', 'ANIMATION', 96, 'Kelsey Mann', '2024-06-14 00:00:00.000', 'https://media.themoviedb.org/t/p/w300_and_h450_face/ipGrDHnJG0Mj2WLtBemgfcqdh72.jpg', 1),
+  (5, 'The Batman', 'Vigilante Batman investigates corruption in Gotham City.', 'ACTION', 176, 'Matt Reeves', '2022-03-04 00:00:00.000', 'https://media.themoviedb.org/t/p/w300_and_h450_face/3ersG4Qeag3JC1XXiwfcdoHIk9w.jpg', 1),
+  (6, 'The Holdovers', 'A curmudgeonly teacher is forced to remain on campus over the holidays.', 'DRAMA', 133, 'Alexander Payne', '2023-10-27 00:00:00.000', 'https://media.themoviedb.org/t/p/w300_and_h450_face/nxIsE99SFPtxaXyBHSzCFIu54qn.jpg', 1);
 
 -- Screenings over the next 7 days across 2 halls (no time conflicts per hall)
 INSERT INTO screening (id, movie_id, hall_id, start_time, end_time, base_price, cancelled, status) VALUES
@@ -100,12 +100,12 @@ INSERT INTO screening (id, movie_id, hall_id, start_time, end_time, base_price, 
 
 -- Snack items
 INSERT INTO snack_item (id, name, description, price, stock_quantity, image_url, available) VALUES
-  (1, 'Popcorn Large', 'Freshly popped salted popcorn, large size', 6.5, 200, NULL, 1),
-  (2, 'Popcorn Medium', 'Freshly popped salted popcorn, medium size', 4.5, 200, NULL, 1),
-  (3, 'Sweet Popcorn Large', 'Caramel popcorn, large size', 7.0, 150, NULL, 1),
-  (4, 'Cola 0.5L', 'Chilled Coca-Cola', 3.5, 300, NULL, 1),
-  (5, 'Sparkling Water 0.5L', 'Chilled sparkling water', 2.5, 300, NULL, 1),
-  (6, 'Nachos with cheese', 'Corn nachos with cheese dip', 5.5, 100, NULL, 1),
-  (7, 'Hot Dog', 'Classic hot dog with mustard and ketchup', 4.9, 80, NULL, 1),
-  (8, 'Mineral Water 0.5L', 'Still mineral water', 2.0, 300, NULL, 1),
-  (9, 'Ice Cream Vanilla', 'Single scoop vanilla ice cream', 3.0, 120, NULL, 1);
+  (1, 'Popcorn Large', 'Freshly popped salted popcorn, large size', 6.5, 200, 'https://images.pexels.com/photos/33129/popcorn-movie-party-entertainment.jpg?auto=compress&cs=tinysrgb&w=400', 1),
+  (2, 'Popcorn Medium', 'Freshly popped salted popcorn, medium size', 4.5, 200, 'https://images.pexels.com/photos/33129/popcorn-movie-party-entertainment.jpg?auto=compress&cs=tinysrgb&w=400', 1),
+  (3, 'Sweet Popcorn Large', 'Caramel popcorn, large size', 7.0, 150, 'https://images.pexels.com/photos/7676079/pexels-photo-7676079.jpeg?auto=compress&cs=tinysrgb&w=400', 1),
+  (4, 'Cola 0.5L', 'Chilled Coca-Cola', 3.5, 300, 'https://images.pexels.com/photos/4113656/pexels-photo-4113656.jpeg?auto=compress&cs=tinysrgb&w=400', 1),
+  (5, 'Sparkling Water 0.5L', 'Chilled sparkling water', 2.5, 300, 'https://images.pexels.com/photos/3737800/pexels-photo-3737800.jpeg?auto=compress&cs=tinysrgb&w=400', 1),
+  (6, 'Nachos with cheese', 'Corn nachos with cheese dip', 5.5, 100, 'https://images.pexels.com/photos/29851128/pexels-photo-29851128.jpeg?auto=compress&cs=tinysrgb&w=400', 1),
+  (7, 'Hot Dog', 'Classic hot dog with mustard and ketchup', 4.9, 80, 'https://images.pexels.com/photos/28087251/pexels-photo-28087251.jpeg?auto=compress&cs=tinysrgb&w=400', 1),
+  (8, 'Mineral Water 0.5L', 'Still mineral water', 2.0, 300, 'https://images.pexels.com/photos/3737800/pexels-photo-3737800.jpeg?auto=compress&cs=tinysrgb&w=400', 1),
+  (9, 'Ice Cream Vanilla', 'Single scoop vanilla ice cream', 3.0, 120, 'https://images.pexels.com/photos/22809596/pexels-photo-22809596.jpeg?auto=compress&cs=tinysrgb&w=400', 1);

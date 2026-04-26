@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.psi.psinema.domain.hall.Seat;
 import org.psi.psinema.domain.order.Order;
 
@@ -38,8 +40,7 @@ public class Ticket {
     @Column(unique = true, nullable = false)
     private String qrCodeData;
 
-    @Lob
-    @Column(columnDefinition = "bytea")
+    @JdbcTypeCode(SqlTypes.VARBINARY)
     private byte[] qrCodeImage;
 
     private BigDecimal price;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { getMovies } from '../../api/movies';
 
@@ -14,7 +14,7 @@ export default function ProgramScreen({ navigation }: any) {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Now Showing</Text>
       <TextInput style={styles.search} placeholder="Search movies…" value={search} onChangeText={setSearch} />
       <View style={styles.genreRow}>
@@ -47,7 +47,7 @@ export default function ProgramScreen({ navigation }: any) {
           ListEmptyComponent={<Text style={styles.empty}>No movies found.</Text>}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

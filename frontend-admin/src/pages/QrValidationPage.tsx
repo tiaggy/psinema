@@ -9,6 +9,7 @@ export default function QrValidationPage() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [manualCode, setManualCode] = useState('');
+  const [mirrored, setMirrored] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   const handleCode = async (code: string) => {
@@ -59,11 +60,16 @@ export default function QrValidationPage() {
       <h1 className={styles.heading}>Ticket Validation</h1>
 
       <div className={styles.scanner}>
-        <div id="qr-reader" className={styles.qrReader} />
+        <div id="qr-reader" className={styles.qrReader} style={mirrored ? { transform: 'scaleX(-1)' } : undefined} />
         {!scanning ? (
           <button className={styles.btn} onClick={startScan}>Start Camera Scan</button>
         ) : (
-          <button className={styles.btnSecondary} onClick={stopScan}>Stop Scanning</button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className={styles.btnSecondary} onClick={stopScan}>Stop Scanning</button>
+            <button className={styles.btnSecondary} onClick={() => setMirrored(m => !m)}>
+              {mirrored ? 'Unmirror' : 'Mirror'}
+            </button>
+          </div>
         )}
       </div>
 

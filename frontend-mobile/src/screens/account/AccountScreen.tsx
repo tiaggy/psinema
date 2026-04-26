@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 
 export default function AccountScreen({ navigation }: any) {
@@ -6,7 +6,7 @@ export default function AccountScreen({ navigation }: any) {
 
   if (!isAuthenticated()) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.heading}>Account</Text>
         <Text style={styles.subtitle}>Sign in to access your account, orders, and tickets.</Text>
         <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Login')}>
@@ -15,7 +15,7 @@ export default function AccountScreen({ navigation }: any) {
         <TouchableOpacity style={styles.btnOutline} onPress={() => navigation.navigate('Register')}>
           <Text style={styles.btnOutlineText}>Create Account</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -27,7 +27,7 @@ export default function AccountScreen({ navigation }: any) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Account</Text>
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
@@ -40,7 +40,7 @@ export default function AccountScreen({ navigation }: any) {
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>Sign Out</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

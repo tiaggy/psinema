@@ -22,6 +22,7 @@ public class DataInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         createUserIfAbsent("admin@psinema.com", "admin123", Role.ADMIN, "Admin", "User");
         createUserIfAbsent("employee@psinema.com", "employee123", Role.EMPLOYEE, "Staff", "Member");
+        createUserIfAbsent("customer@psinema.com", "customer123", Role.CUSTOMER, "Test", "Customer");
     }
 
     private void createUserIfAbsent(String email, String password, Role role, String firstName, String lastName) {

@@ -17,6 +17,7 @@ export default function RegisterScreen({ navigation }: any) {
     try {
       const data = await register(form);
       storeLogin(data.token, { email: data.email, role: data.role, firstName: data.firstName, lastName: data.lastName });
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (e: any) {
       Alert.alert('Registration failed', e.response?.data?.message ?? 'Please try again');
     } finally {

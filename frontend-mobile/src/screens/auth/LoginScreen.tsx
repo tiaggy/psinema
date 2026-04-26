@@ -15,6 +15,7 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const data = await login(email, password);
       storeLogin(data.token, { email: data.email, role: data.role, firstName: data.firstName, lastName: data.lastName });
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch {
       Alert.alert('Login failed', 'Invalid email or password');
     } finally {

@@ -86,7 +86,7 @@ export default function MoviesPage() {
 
       {isLoading ? <p>Loading…</p> : (
         <div className={styles.grid3}>
-          {movies?.map(m => (
+          {movies?.filter(m => m && m.id != null).map(m => (
             <div key={m.id} className={styles.card}>
               {m.posterUrl && <img src={m.posterUrl} alt={m.title} className={styles.poster} />}
               <div className={styles.cardBody}>

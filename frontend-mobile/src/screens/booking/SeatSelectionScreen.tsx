@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { getScreeningSeats } from '../../api/screenings';
@@ -13,8 +14,9 @@ export default function SeatSelectionScreen({ route, navigation }: any) {
   const { data: seats, isLoading } = useQuery({
     queryKey: ['seats', screening.id],
     queryFn: () => getScreeningSeats(screening.id),
-    onSuccess: () => setScreening(screening.id),
   });
+
+  useEffect(() => { setScreening(screening.id); }, [screening.id]);
 
   const handleContinue = async () => {
     if (!isAuthenticated()) {

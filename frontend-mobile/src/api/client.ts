@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-const BASE_URL = 'http://147.175.163.102:8080/api'; // Android emulator → localhost; change to your IP for physical device
+const BASE_URL = 'http://change-your-ip:8080/api';
 
 const client = axios.create({ baseURL: BASE_URL });
 

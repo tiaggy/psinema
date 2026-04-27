@@ -34,6 +34,12 @@ npm run dev
 
 ### Mobile frontend (Expo)
 
+Before starting, set the backend URL in `frontend-mobile/src/api/client.ts`:
+replace `change-your-ip` in `BASE_URL` with your dev machine's LAN IP (e.g. `192.168.0.101`).
+The phone and PC must be on the same network, and port 8080 must be reachable
+(allow it through Windows Firewall). Use `10.0.2.2` for the Android emulator
+or `localhost` for the iOS simulator.
+
 ```bash
 cd frontend-mobile
 npm install

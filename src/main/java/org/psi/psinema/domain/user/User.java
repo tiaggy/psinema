@@ -29,6 +29,9 @@ public class User {
     private String firstName;
     private String lastName;
 
+    /** telefon - per Diagram 19 Zákazník attribute */
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

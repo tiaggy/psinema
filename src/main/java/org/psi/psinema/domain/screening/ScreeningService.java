@@ -47,7 +47,7 @@ public class ScreeningService {
         List<Seat> seats = seatRepository.findByHallIdOrderByRowNumberAscSeatNumberAsc(screening.getHall().getId());
 
         Set<Long> takenSeatIds = ticketRepository
-                .findByOrderScreeningIdAndStatusIn(screeningId, List.of(TicketStatus.ACTIVE, TicketStatus.USED))
+                .findByOrderScreeningIdAndStatusIn(screeningId, List.of(TicketStatus.VALID, TicketStatus.USED))
                 .stream().map(t -> t.getSeat().getId()).collect(Collectors.toSet());
 
         Set<Long> tempReservedSeatIds = seatReservationRepository

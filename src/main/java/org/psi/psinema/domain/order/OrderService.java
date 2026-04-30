@@ -33,6 +33,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Implements UC_01 (n�kup vstupeniek) and UC_04 (storno + refund�cia).
+ * Order lifecycle (Diagram 23): CREATED -> AWAITING_PAYMENT -> PAID -> ACTIVE
+ *                                                          \-> CANCELLED
+ *                               ACTIVE -> STORNOVANA -> REFUNDED   (UC_04)
+ *                               any    -> CANCELLED                (UC_07 cascade)
+ * Payment lifecycle (Diagram 27): PENDING -> PROCESSING -> SUCCESS -> COMPLETED | REFUNDED
+ *                                                       \-> FAILED  -> CANCELLED
+ * Ticket lifecycle (Diagram 28): GENERATED -> VALID -> USED | CANCELLED | EXPIRED
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -76,43 +86,66 @@ public class OrderService {
         BigDecimal basePrice = screening.getBasePrice() != null ? screening.getBasePrice() : BigDecimal.ZERO;
         BigDecimal total = basePrice.multiply(BigDecimal.valueOf(reservations.size()));
 
-        // Create order
+        // (1) Vytvoren� - persist order in CREATED state
         Order order = Order.builder()
                 .user(user)
                 .screening(screening)
-                .status(OrderStatus.CONFIRMED)
+                .status(OrderStatus.CREATED)
                 .totalAmount(total)
                 .build();
         order = orderRepository.save(order);
 
-        // Process payment (skipped when app.dont-pay=true)
+        // (2) cakaj�ca na platbu - move to AWAITING_PAYMENT before charging the gateway
+        order.setStatus(OrderStatus.AWAITING_PAYMENT);
+        order = orderRepository.save(order);
+
+        // (3) Process payment via the external gateway (PaymentGateway = Diagram 18 boundary)
+        Payment payment = Payment.builder()
+                .order(order)
+                .status(PaymentStatus.PROCESSING)
+                .method(request.getPaymentMethod() != null ? request.getPaymentMethod() : "CARD")
+                .amount(total)
+                .processedAt(LocalDateTime.now())
+                .build();
+
         if (!dontPay) {
             PaymentGateway.PaymentResult result = paymentGateway.charge(total, request.getPaymentToken());
             if (!result.success()) {
+                // platba zlyhala -> objedn�vka prech�dza do zrušenej, sedadl� uvolnen�
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                order.setStatus(OrderStatus.CANCELLED);
+                orderRepository.save(order);
+                reservations.forEach(r -> r.setReleased(true));
+                reservationRepository.saveAll(reservations);
                 throw new ConflictException("Payment failed: " + result.message());
             }
-            Payment payment = Payment.builder()
-                    .order(order)
-                    .status(PaymentStatus.COMPLETED)
-                    .externalTransactionId(result.transactionId())
-                    .amount(total)
-                    .processedAt(LocalDateTime.now())
-                    .build();
-            paymentRepository.save(payment);
+            payment.setExternalTransactionId(result.transactionId());
+            payment.setStatus(PaymentStatus.SUCCESS);
+        } else {
+            // Test/dev path - simulate immediate success.
+            payment.setExternalTransactionId(UUID.randomUUID().toString());
+            payment.setStatus(PaymentStatus.SUCCESS);
         }
+        paymentRepository.save(payment);
 
-        // Create tickets + release reservations
+        // (4) zaplaten� - mark order as PAID
+        order.setStatus(OrderStatus.PAID);
+        order = orderRepository.save(order);
+
+        // (5) Generate tickets and free the temporary reservations.
         List<Ticket> tickets = new ArrayList<>();
         for (int i = 0; i < reservations.size(); i++) {
             SeatReservation r = reservations.get(i);
             TicketType type = (request.getTicketTypes() != null && i < request.getTicketTypes().size())
                     ? request.getTicketTypes().get(i) : TicketType.NORMAL;
             String qrData = UUID.randomUUID().toString();
+            // Diagram 28: GENERATED -> VALID after successful payment.
             tickets.add(Ticket.builder()
                     .order(order)
                     .seat(r.getSeat())
                     .type(type)
-                    .status(TicketStatus.ACTIVE)
+                    .status(TicketStatus.VALID)
                     .qrCodeData(qrData)
                     .qrCodeImage(QrCodeGenerator.generate(qrData))
                     .price(basePrice)
@@ -121,6 +154,14 @@ public class OrderService {
         }
         ticketRepository.saveAll(tickets);
         reservationRepository.saveAll(reservations);
+
+        // (6) Diagram 23: vstupenky vygenerovan� -> aktívna
+        order.setStatus(OrderStatus.ACTIVE);
+        order = orderRepository.save(order);
+
+        // (7) Payment moves to its terminal COMPLETED state once the order is fulfilled.
+        payment.setStatus(PaymentStatus.COMPLETED);
+        paymentRepository.save(payment);
 
         return order;
     }
@@ -141,12 +182,19 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    /**
+     * UC_04: Customer storno + refund (Diagram 11/20).
+     * - Storno window: at least 5 minutes before screening start.
+     * - Refund window: at least 60 minutes before start (per UC text).
+     */
     @Transactional
     public void cancelOrder(Long orderId, CancelRequest request, String userEmail) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        if (order.getStatus() == OrderStatus.CANCELLED) {
+        if (order.getStatus() == OrderStatus.CANCELLED
+                || order.getStatus() == OrderStatus.STORNOVANA
+                || order.getStatus() == OrderStatus.REFUNDED) {
             throw new CancellationNotAllowedException("Order already cancelled");
         }
 
@@ -168,23 +216,34 @@ public class OrderService {
                     .toList();
         }
 
+        // Pouzit� vstupenky nie je mozn� stornova (Diagram 20 / UC_04 exception).
+        for (Ticket t : ticketsToCancel) {
+            if (t.getStatus() == TicketStatus.USED) {
+                throw new CancellationNotAllowedException("Cannot cancel a ticket that has already been used");
+            }
+        }
+
         ticketsToCancel.forEach(t -> t.setStatus(TicketStatus.CANCELLED));
         ticketRepository.saveAll(ticketsToCancel);
 
-        // Check if entire order is now cancelled
+        // Diagram 23: ak s� vsetky vstupenky stornovan� -> objedn�vka prech�dza do stornovan�.
         List<Ticket> allTickets = ticketRepository.findByOrderId(orderId);
         boolean allCancelled = allTickets.stream().allMatch(t -> t.getStatus() == TicketStatus.CANCELLED);
         if (allCancelled) {
-            order.setStatus(OrderStatus.CANCELLED);
+            order.setStatus(OrderStatus.STORNOVANA);
             orderRepository.save(order);
         }
 
-        // Refund if >60 min before start
+        // Refund only if the customer is still within the refund window.
         if (minutesToStart >= 60) {
-            processRefund(order, ticketsToCancel);
+            processRefund(order, ticketsToCancel, /*automatic=*/ false);
         }
     }
 
+    /**
+     * UC_07: Manager-initiated screening cancellation (Diagram 17/31).
+     * Cascades order CANCELLED status, ticket CANCELLED, automatic refund + notifications.
+     */
     @Transactional
     public void cancelScreening(Long screeningId) {
         Screening screening = screeningRepository.findById(screeningId)
@@ -192,31 +251,40 @@ public class OrderService {
         screening.setCancelled(true);
         screeningRepository.save(screening);
 
-        // Cancel all active tickets + refund
-        List<Order> orders = orderRepository.findByScreeningIdAndStatus(screeningId, OrderStatus.CONFIRMED);
+        // Cancel all live orders (PAID, ACTIVE, CREATED, AWAITING_PAYMENT) for this screening.
+        List<Order> orders = new ArrayList<>();
+        for (OrderStatus s : List.of(OrderStatus.ACTIVE, OrderStatus.PAID,
+                                     OrderStatus.AWAITING_PAYMENT, OrderStatus.CREATED)) {
+            orders.addAll(orderRepository.findByScreeningIdAndStatus(screeningId, s));
+        }
         for (Order order : orders) {
             List<Ticket> tickets = ticketRepository.findByOrderId(order.getId());
             tickets.forEach(t -> t.setStatus(TicketStatus.CANCELLED));
             ticketRepository.saveAll(tickets);
+            // Diagram 23: predstavenie zrušen� -> zrušen�.
             order.setStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
-            processRefund(order, tickets);
+            processRefund(order, tickets, /*automatic=*/ true);
             notificationService.notifyScreeningCancelled(order.getUser(), screening);
         }
     }
 
-    private void processRefund(Order order, List<Ticket> tickets) {
+    private void processRefund(Order order, List<Ticket> tickets, boolean automatic) {
         paymentRepository.findByOrderId(order.getId()).ifPresent(payment -> {
             BigDecimal refundAmount = tickets.stream()
                     .map(Ticket::getPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             PaymentGateway.PaymentResult result = paymentGateway.refund(
                     payment.getExternalTransactionId(), refundAmount);
-            payment.setStatus(result.success() ? PaymentStatus.REFUNDED : PaymentStatus.MANUAL_REFUND);
+            // Diagram 27: �spešn� -> platba je refundovan�; failure stays SUCCESS for manual.
+            payment.setStatus(result.success() ? PaymentStatus.REFUNDED : PaymentStatus.SUCCESS);
             paymentRepository.save(payment);
             if (result.success()) {
-                order.setStatus(OrderStatus.REFUNDED);
-                orderRepository.save(order);
+                // Diagram 23: stornovan� -> refundovan� (zrušen� stays in CANCELLED).
+                if (order.getStatus() == OrderStatus.STORNOVANA) {
+                    order.setStatus(OrderStatus.REFUNDED);
+                    orderRepository.save(order);
+                }
                 notificationService.notifyRefundProcessed(
                         order.getUser(), payment.getExternalTransactionId(), refundAmount.toPlainString());
             }

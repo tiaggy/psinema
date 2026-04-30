@@ -15,4 +15,6 @@ public class OrderRequest {
     private List<Long> reservationIds;
     private List<TicketType> ticketTypes; // parallel to reservationIds, defaults to NORMAL
     private String paymentToken;
+    /** sposob platby per Diagram 19 (CARD, CASH, ...). Defaults to CARD if null. */
+    private String paymentMethod;
 }

@@ -8,6 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Implements UC_02 (kontrola vstupeniek pri vstupe).
+ * Diagram 21/28: VALID -> USED. Other states are rejected with explicit reason.
+ */
 @Service
 @RequiredArgsConstructor
 public class TicketService {
@@ -27,6 +31,7 @@ public class TicketService {
         return ticketRepository.findByUserId(userId);
     }
 
+    /** UC_02 main success scenario: dek�duj QR -> overPlatnost -> oznacAkoPouzit�. */
     @Transactional
     public Ticket validateQr(String qrCodeData) {
         Ticket ticket = ticketRepository.findByQrCodeData(qrCodeData)
@@ -34,6 +39,7 @@ public class TicketService {
         return markAsUsed(ticket);
     }
 
+    /** UC_02 extension: manu�lna kontrola vstupeniek (n�dzov� scen�r). */
     @Transactional
     public Ticket manualCheck(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
@@ -42,16 +48,13 @@ public class TicketService {
     }
 
     private Ticket markAsUsed(Ticket ticket) {
-        if (ticket.getStatus() == TicketStatus.USED) {
-            throw new ConflictException("Ticket already used");
+        switch (ticket.getStatus()) {
+            case USED      -> throw new ConflictException("Ticket already used");
+            case CANCELLED -> throw new ConflictException("Ticket is cancelled");
+            case EXPIRED   -> throw new ConflictException("Ticket is expired");
+            case GENERATED -> throw new ConflictException("Ticket is not yet valid (payment pending)");
+            case VALID     -> ticket.setStatus(TicketStatus.USED);
         }
-        if (ticket.getStatus() == TicketStatus.CANCELLED) {
-            throw new ConflictException("Ticket is cancelled");
-        }
-        if (ticket.getStatus() == TicketStatus.EXPIRED) {
-            throw new ConflictException("Ticket is expired");
-        }
-        ticket.setStatus(TicketStatus.USED);
         return ticketRepository.save(ticket);
     }
 }

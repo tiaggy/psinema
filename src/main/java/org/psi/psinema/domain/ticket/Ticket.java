@@ -35,7 +35,7 @@ public class Ticket {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private TicketStatus status = TicketStatus.ACTIVE;
+    private TicketStatus status = TicketStatus.GENERATED;
 
     @Column(unique = true, nullable = false)
     private String qrCodeData;

@@ -31,7 +31,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status = OrderStatus.CREATED;
 
     private BigDecimal totalAmount;
 

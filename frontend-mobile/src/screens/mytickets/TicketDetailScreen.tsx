@@ -24,7 +24,7 @@ export default function TicketDetailScreen({ route, navigation }: any) {
     ]);
   };
 
-  const isActive = ticket.status === 'ACTIVE';
+  const isActive = ticket.status === 'VALID';
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

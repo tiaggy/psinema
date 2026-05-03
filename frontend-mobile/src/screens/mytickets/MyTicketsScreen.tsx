@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getMyTickets } from '../../api/orders';
 import { useAuthStore } from '../../store/authStore';
 
-const STATUS_COLOR: Record<string, string> = { ACTIVE: '#2ecc71', USED: '#aaa', CANCELLED: '#e74c3c' };
+const STATUS_COLOR: Record<string, string> = { VALID: '#2ecc71', GENERATED: '#f39c12', USED: '#aaa', CANCELLED: '#e74c3c', EXPIRED: '#999' };
 
 export default function MyTicketsScreen({ navigation }: any) {
   const { isAuthenticated } = useAuthStore();

@@ -1,0 +1,69 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: #1a1a2e;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #e94560;
+  padding: 0 20px 8px;
+  border-bottom: 1px solid #2a2a4a;
+  margin-bottom: 8px;
+}
+
+.user {
+  font-size: 0.8rem;
+  color: #aaa;
+  padding: 4px 20px 16px;
+  border-bottom: 1px solid #2a2a4a;
+  margin-bottom: 12px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.link {
+  padding: 10px 20px;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.link:hover {
+  background: #2a2a4a;
+  color: #fff;
+}
+
+.active {
+  background: #2a2a4a;
+  color: #e94560;
+  border-left: 3px solid #e94560;
+}
+
+.logout {
+  margin: 16px 20px 0;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid #e94560;
+  color: #e94560;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+}
+
+.logout:hover {
+  background: #e94560;
+  color: #fff;
+}
